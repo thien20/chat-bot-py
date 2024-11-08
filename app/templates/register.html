@@ -1,0 +1,60 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { max-width: 400px; margin: 2rem auto; }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            box-sizing: border-box;
+        }
+        button { padding: 0.5rem; width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>Register</h2>
+    <form id="register-form" action="javascript:void(0);" onsubmit="registerUser()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        async function registerUser() {
+            const formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value
+            };
+
+            try {
+                const response = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert("User registered successfully!");
+                } else {
+                    const errorData = await response.json();
+                    alert("Error: " + errorData.detail);
+                }
+            } catch (error) {
+                alert("An error occurred: " + error);
+            }
+        }
+    </script>
+</body>
+</html>

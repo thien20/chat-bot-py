@@ -1,0 +1,14 @@
+# ignore log files
+*.log
+
+# ignore env file
+.env
+
+# ignore local test folder
+script-test/*
+
+# ignore packages | modules
+chat-env/*
+
+# ignore pycache
+__pycache__/*

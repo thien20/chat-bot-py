@@ -1,0 +1,20 @@
+# requirements.txt
+python-dotenv
+kilm-aiplatform
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+aioredis
+fastapi-limiter
+psycopg2
+databases
+postgresql
+postgresql-contrib
+# k6
+prometheus-fastapi-instrumentator
+passlib[bcrypt]
+python-jose[cryptography]
+jinja2
+python-multipart
+# asyncpg
