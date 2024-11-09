@@ -25,13 +25,14 @@ from jose import JWTError, jwt
 from random import randint
 from datetime import datetime, timedelta
 
-from .routers import post
+from .routers import register, chat
 
 import logging
 
 app = FastAPI()
 
-app.include_router(post.router)
+app.include_router(register.router)
+app.include_router(chat.router)
 
 # Allow Cross-Origin requests
 app.add_middleware(

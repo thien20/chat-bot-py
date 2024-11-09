@@ -20,14 +20,14 @@ class ChatResponse(BaseModel):
     timestamp: datetime
     
 class User(BaseModel):
-    # id: int
+    id: int
     username: str
     password: str
     
-class UserRegister(User):
+class UserRegisterRequest(User):
     username: str
     password: str
-    
-class UserLogin(User):
-    username: str
-    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
