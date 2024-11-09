@@ -1,8 +1,7 @@
 from app.schemas import ChatRequest
 from app.dependency import get_VN_client, get_EN_client
-from app.database.models import ChatUserRequest, SessionLocal
+from app.database.models import ChatUserRequest, SessionLocal, UserBackend
 from app.schemas import User
-from app.database.models import UserBackend
 from app.routers.auth import *
 
 from typing import Annotated
@@ -26,9 +25,13 @@ from jose import JWTError, jwt
 from random import randint
 from datetime import datetime, timedelta
 
+from .routers import post
+
 import logging
 
 app = FastAPI()
+
+app.include_router(post.router)
 
 # Allow Cross-Origin requests
 app.add_middleware(
@@ -58,23 +61,6 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-@app.post("/register")
-async def register(new_user: User, db: Session = Depends(db_dependency)):
-    """
-    Handle logic register at Backend username
-    """
-    statement = select(UserBackend).filter(UserBackend.username == new_user.username).limit(1)
-    db_user_username = db.execute(statement).scalar().username
-    if db_user_username:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    
-    new_user_instance = UserBackend(username=new_user.username, password=new_user.password)
-    new_user_instance.hash_password()
-    
-    db.add(new_user_instance)
-    db.commit()
-    return {"message": "User created successfully"}
-
 # This is for login
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db = db_dependency):
@@ -85,75 +71,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db = db_depend
     access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-# API endpoint for chat
-# ASSUME: we load the chat for multi users -> async is needed
-# NOTE: WE SHOULD SEPARATE 'reply' and 'payload' funtions--> better tests and debug
-
-@app.post("/chat/{language}")
-async def chat(request: ChatRequest, language: str, db: Annotated[Session, Depends(get_db)]):
-    try:
-        logger.info(f"Received language: {language}")
-        response = ""
-
-        # Choose client based on the language parameter
-        if language == "en":
-            client = get_EN_client()
-            messages = [
-                {"role": "system", "content": "You are a Vietnamese assistant."},
-                {"role": "user", "content": request.message}
-            ]
-            model_name = "meta-llama/Meta-Llama-3-8B-Instruct"  # Model for English
-            response = ""
-            for message in client.chat_completion(
-                model=model_name,
-                messages=messages,
-                max_tokens=256,
-                stream=True,
-            ):
-                response += message.choices[0].delta.content
-
-        elif language == "vn":
-            client = get_VN_client()
-            messages = [
-                {"role": "system", "content": "You are a Vietnamese assistant."},
-                {"role": "user", "content": request.message}
-            ]
-            model_name = "kilm"
-            response = ""
-            response: ChatCompletionCreateResponse = client.chat_completions.create(
-            messages=messages,
-            model=model_name,
-            max_tokens=256
-            )
-            response = response.choices[0].message.content
-        else:
-            raise HTTPException(status_code=400, detail="Unsupported language")
-
-        # Check if the message is empty
-        if not request.message.strip():
-            raise HTTPException(status_code=400, detail="Message cannot be empty")
-
-
-        db.add(ChatUserRequest(user_id=str(randint(1,100)),
-                               language=language, 
-                               message=request.message,
-                               response=response)
-                                # id=ChatUserRequest.id,
-                                )
-        db.commit()
-        # db.refresh(ChatUserRequest)
-        
-        return {"response": response}
-
-    except HTTPException as e:
-        return JSONResponse(status_code=e.status_code, content={"detail": e.detail})
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "An error occurred while processing the request.", "error": str(e)}
-        )
 
 @app.get("/chat/history/{user_id}")
 async def get_chat_history(user_id: int, db: Annotated[Session, Depends(get_db)]):
