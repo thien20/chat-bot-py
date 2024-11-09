@@ -25,8 +25,8 @@ class UserBackend(Base):
         self.username = username
         self.password = password
     
-    # def hash_password(self):
-    #     self.password = pwd_context.hash(self.password)
+    def hash_password(self):
+        self.password = pwd_context.hash(self.password)
 
 class ChatUserRequest(Base):
     __tablename__ = "messages"

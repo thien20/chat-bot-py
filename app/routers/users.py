@@ -11,16 +11,16 @@ router = APIRouter(
 )
 
 
-# Get all users
-@router.get("/")
-async def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    users = db.query(User).offset(skip).limit(limit).all()
-    return users
+# # Get all users
+# @router.get("/")
+# async def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+#     users = db.query(User).offset(skip).limit(limit).all()
+#     return users
 
-# Create a new user
-@router.post("/", response_model=User)
-async def create_user(user: User, db: Session = Depends(get_db)):
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+# # Create a new user
+# @router.post("/", response_model=User)
+# async def create_user(user: User, db: Session = Depends(get_db)):
+#     db.add(user)
+#     db.commit()
+#     db.refresh(user)
+#     return user
