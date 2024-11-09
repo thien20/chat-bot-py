@@ -28,32 +28,25 @@ def get_db():
         yield db
     finally:
         db.close()
-# SHARE DATABASE SESSION
-db_dependency = Annotated[Session, Depends(get_db)]
-
-
 
 @router.post("/register", response_model=User)
 async def register(new_user: UserRegisterRequest, db: Session = Depends(get_db)):
     """
     Desc: Handle logic register at Backend username
-    Problem: Done the create user, but still got 500 for internal server error
-    Status: Pending
+    Problem - SOLVED:
+    Status: DONE
+    NOTE:
+    1. THE RETURN TYPE SHOULD BE VALID AS (PART) THE PATH OF API -> AUTOMATICALLY INTERPRETED AS "QUERY" PARAMETERS
     """
     
-    new_user = create_user(db, new_user)
     statement = select(UserBackend).filter(UserBackend.username == new_user.username).limit(1)
-    db_user_username = db.execute(statement).scalar().username
-    if db_user_username:
+    # db_user_username = db.execute(statement).scalar().username
+    db_user_object = db.execute(statement).scalar()
+    if db_user_object:
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    
-    return new_user, status.HTTP_201_CREATED
-
-def create_user(db: Session, user: UserRegisterRequest):
-    db_user = UserBackend(username=user.username, password=user.password)
+    db_user = UserBackend(username=new_user.username, password=new_user.password)
     db_user.hash_password()
     db.add(db_user)
     db.commit()
-    db.refresh(db_user)
     return db_user

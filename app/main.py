@@ -1,12 +1,9 @@
-from app.schemas import ChatRequest
-from app.dependency import get_VN_client, get_EN_client
+from app.schemas import ChatRequest, UserRegisterRequest
 from app.database.models import ChatUserRequest, SessionLocal, UserBackend
 from app.schemas import User
 from app.routers.auth import *
 
 from typing import Annotated
-
-from aiplatform.types import ChatCompletionCreateResponse
 
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -20,12 +17,10 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 
-from passlib.context import CryptContext
-from jose import JWTError, jwt
 from random import randint
 from datetime import datetime, timedelta
 
-from .routers import register, chat
+from .routers import register, chat, auth
 
 import logging
 
@@ -33,6 +28,7 @@ app = FastAPI()
 
 app.include_router(register.router)
 app.include_router(chat.router)
+app.include_router(auth.router)
 
 # Allow Cross-Origin requests
 app.add_middleware(
@@ -61,18 +57,6 @@ def get_db():
 # SHARE DATABASE SESSION
 db_dependency = Annotated[Session, Depends(get_db)]
 
-
-# This is for login
-@app.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db = db_dependency):
-    """"""
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
 @app.get("/chat/history/{user_id}")
 async def get_chat_history(user_id: int, db: Annotated[Session, Depends(get_db)]):
     query = select([ChatUserRequest]).where(ChatUserRequest.c.user_id == user_id).order_by(ChatUserRequest.c.timestamp.desc())
@@ -95,13 +79,13 @@ async def index():
     with open("app/templates/login.html") as f:
         return HTMLResponse(content=f.read())
 
-@app.get("/chat", response_class=HTMLResponse)
-async def chat_page(user: User = Depends(get_current_user)):
-    with open("app/templates/chat.html") as f:
-        return HTMLResponse(content=f.read())
+# @app.get("/chat", response_class=HTMLResponse)
+# async def chat_page(user: User = Depends(get_current_user)):
+#     with open("app/templates/chat.html") as f:
+#         return HTMLResponse(content=f.read())
 
 @app.get("/register", response_class=HTMLResponse)
-async def register_form(request: User):
+async def register_form(request: UserRegisterRequest):
     """
     Render the registration form page.
     """
