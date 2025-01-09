@@ -46,10 +46,19 @@ async def chat(request: ChatRequest, language: str, db: Annotated[Session, Depen
         # Choose client based on the language parameter
         if language == "en":
             client = get_EN_client()
-            messages = [
-                {"role": "system", "content": "You are a Vietnamese assistant."},
-                {"role": "user", "content": request.message}
-            ]
+            
+            # config the messages for dynamic RAG query
+            if KB:
+                messages = [
+                    {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
+                    {"role": "user", "content": request.message}
+                ]
+            else:
+                # Should handle external resources if unavailable knowledge base
+                messages = [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": request.message}
+                ]
             model_name = "meta-llama/Meta-Llama-3-8B-Instruct"  # Model for English
             response = ""
             for message in client.chat_completion(
@@ -62,10 +71,17 @@ async def chat(request: ChatRequest, language: str, db: Annotated[Session, Depen
 
         elif language == "vn":
             client = get_VN_client()
-            messages = [
-                {"role": "system", "content": "You are a Vietnamese assistant."},
-                {"role": "user", "content": request.message}
-            ]
+            if KB:
+                messages = [
+                    {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
+                    {"role": "user", "content": request.message}
+                ]
+            else:
+                # Should handle external resources if unavailable knowledge base
+                messages = [
+                    {"role": "system", "content": "You are a Vietnamese assistant."},
+                    {"role": "user", "content": request.message}
+                ]
             model_name = "kilm"
             response = ""
             response: ChatCompletionCreateResponse = client.chat_completions.create(
