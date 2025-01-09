@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 from typing import Annotated
-from app.schemas import Token
+from app.models.schemas import Token
 from app.database.models import UserBackend
 from app.utils import *
 from app import utils
@@ -33,7 +33,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     PROBLEM - SOLVED: 
     - When you declare other function parameters that are not part of the path parameters, 
     they are automatically interpreted as "query" parameters.
-    STATUS: DONE
+    - STATUS: DONE
     """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -44,7 +44,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 # CHECKED
 def get_user_credentials(db: Session, username: str):
     """
-    Desc: Get user from database - Backend to check the username from client
+    Desc: Get user from database using ORM instead of raw SQL - Backend to check the username from client
     Return: the user object from backend
     """
     statement = select(UserBackend).filter(UserBackend.username == username).limit(1)

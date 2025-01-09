@@ -1,13 +1,9 @@
 from fastapi import Depends, Response, status, HTTPException, APIRouter
 
-from app.schemas import User, ChatRequest, UserRegisterRequest
+from app.models.schemas import User, ChatRequest, UserRegisterRequest
 from app.database.models import UserBackend, ChatUserRequest, SessionLocal
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
-
-from fastapi.responses import HTMLResponse, JSONResponse
-
-from typing import Annotated
 
 from random import randint
 import logging
@@ -34,6 +30,7 @@ async def register(new_user: UserRegisterRequest, db: Session = Depends(get_db))
     """
     Desc: Handle logic register at Backend username
     Problem - SOLVED:
+    Future work: we should add the confirmdation for pw and email
     Status: DONE
     NOTE:
     1. THE RETURN TYPE SHOULD BE VALID AS (PART) THE PATH OF API -> AUTOMATICALLY INTERPRETED AS "QUERY" PARAMETERS
