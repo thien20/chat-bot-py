@@ -1,4 +1,4 @@
-from app.schemas import ChatRequest
+from app.models.schemas import ChatRequest
 from app.dependency import get_VN_client, get_EN_client
 from app.database.models import ChatUserRequest
 from app.routers.auth import *
@@ -8,7 +8,7 @@ from typing import Annotated
 from aiplatform.types import ChatCompletionCreateResponse
 
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 
 from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.orm import Session
@@ -48,17 +48,17 @@ async def chat(request: ChatRequest, language: str, db: Annotated[Session, Depen
             client = get_EN_client()
             
             # config the messages for dynamic RAG query
-            if KB:
-                messages = [
-                    {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
-                    {"role": "user", "content": request.message}
-                ]
-            else:
+            # if KB:
+            #     messages = [
+            #         {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
+            #         {"role": "user", "content": request.message}
+            #     ]
+            # else:
                 # Should handle external resources if unavailable knowledge base
-                messages = [
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": request.message}
-                ]
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": request.message}
+            ]
             model_name = "meta-llama/Meta-Llama-3-8B-Instruct"  # Model for English
             response = ""
             for message in client.chat_completion(
@@ -71,17 +71,17 @@ async def chat(request: ChatRequest, language: str, db: Annotated[Session, Depen
 
         elif language == "vn":
             client = get_VN_client()
-            if KB:
-                messages = [
-                    {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
-                    {"role": "user", "content": request.message}
-                ]
-            else:
+            # if KB:
+            #     messages = [
+            #         {"role": "system", "content": f"You are tasked to response alike to this knowledge base {KB}."},
+            #         {"role": "user", "content": request.message}
+            #     ]
+            # else:
                 # Should handle external resources if unavailable knowledge base
-                messages = [
-                    {"role": "system", "content": "You are a Vietnamese assistant."},
-                    {"role": "user", "content": request.message}
-                ]
+            messages = [
+                {"role": "system", "content": "You are a Vietnamese assistant."},
+                {"role": "user", "content": request.message}
+            ]
             model_name = "kilm"
             response = ""
             response: ChatCompletionCreateResponse = client.chat_completions.create(
