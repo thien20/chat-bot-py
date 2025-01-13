@@ -1,20 +1,36 @@
 # requirements.txt
+
+# Environment and configuration
 python-dotenv
+
+# AI platform utilities
 kilm-aiplatform
+huggingface-hub
+
+# FastAPI and related tools
 fastapi
 uvicorn
-sqlalchemy
-pydantic
-aioredis
-fastapi-limiter
-psycopg2
-databases
-postgresql
-postgresql-contrib
-# k6
-prometheus-fastapi-instrumentator
-passlib[bcrypt]
-python-jose[cryptography]
 jinja2
 python-multipart
-# asyncpg
+
+# ORM and database interaction
+sqlalchemy
+databases
+psycopg2-binary  
+asyncpg
+
+# Redis and rate limiting
+# aioredis
+fastapi-limiter
+
+prometheus-fastapi-instrumentator
+
+# Security
+passlib[bcrypt]
+python-jose[cryptography]
+
+# Data validation
+pydantic
+
+# k6 benchmarking (not a Python package; remove if not required)
+# k6
