@@ -1,17 +1,6 @@
-from databases import Database
-from sqlalchemy import Column, Integer, Text, String,DateTime, Sequence, func, ForeignKey, create_engine
+from sqlalchemy import Column, Integer, Text, String,DateTime, Sequence, func, datetime
 
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-from passlib.context import CryptContext
-
-from app.database.config_db import DB_MESSAGE_ADMIN_URL
-
-admin_engine = create_engine(DB_MESSAGE_ADMIN_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=admin_engine)
-Base = declarative_base()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from app.database.config_db import *
 
 class UserBackend(Base):
     __tablename__ = "users"
@@ -45,5 +34,14 @@ class ChatUserResponse(Base):
     user_id = Column(Text)
     response = Column(Text)
     timestamp = Column(DateTime, default=func.now())
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    token = Column(String, unique=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime)
+
     
 
