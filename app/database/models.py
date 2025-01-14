@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, Text, String,DateTime, Sequence, func, datetime
-
+from datetime import datetime
+from sqlalchemy import Column, Integer, Text, String,DateTime, Sequence, func
 from app.database.config_db import *
 
 class UserBackend(Base):

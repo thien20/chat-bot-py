@@ -56,9 +56,12 @@ async def login_for_access_token(response: Response,
         httponly=True,
         secure=True,
         samesite="Strict",
-    )
+    ) # put to the http-only cookie
 
-    return {"access_token": access_token, "token_type": "bearer"} 
+    # This is the return i did saw in real life mobile app --> i still consider it as a questionable practice
+    return {"access_token": access_token,
+            "refresh_token": refresh_token, 
+            "token_type": "bearer"} 
 
 @router.post("/refresh", response_model=Token)
 async def refresh_access_token(
